@@ -20,7 +20,7 @@ def update_csv_with_emotions(input_filename, output_filename):
                     print("警告：发现数据不完整的行，将跳过此行。")
                     continue
                 # 打印出每一行的文本内容（第二列）
-                print(row[4])
+                print(row[6])
                 positive_negative = validate_input("请输入一个1-5之间的整数表示正面或负面情感: ")
                 rational_irrational = validate_input("请输入一个1-5之间的整数表示理性或非理性情感: ")
                 row.extend([positive_negative, rational_irrational])
