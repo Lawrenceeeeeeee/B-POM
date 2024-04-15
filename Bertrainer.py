@@ -2,13 +2,28 @@
 # 既可使用本训练程序
 
 import torch
-import os
+import torch.nn as nn
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
-from transformers import BertTokenizer, BertForSequenceClassification, get_linear_schedule_with_warmup
-from torch.optim import AdamW
+from transformers import BertTokenizer, BertModel, AdamW, get_linear_schedule_with_warmup
 from sklearn.model_selection import train_test_split
 import pandas as pd
-import numpy as np
+import os
+from tqdm import tqdm
+
+# 定义一个多任务学习模型
+class BertForMultiTaskLearning(nn.Module):
+    def __init__(self, model_name, num_labels_emotion, num_labels_rational):
+        super(BertForMultiTaskLearning, self).__init__()
+        self.bert = BertModel.from_pretrained(model_name)
+        self.classifiers = nn.ModuleDict({
+            'emotion': nn.Linear(self.bert.config.hidden_size, num_labels_emotion),
+            'rational': nn.Linear(self.bert.config.hidden_size, num_labels_rational)
+        })
+    
+    def forward(self, input_ids, attention_mask, task_name):
+        outputs = self.bert(input_ids, attention_mask=attention_mask)
+        pooled_output = outputs[1]
+        return self.classifiers[task_name](pooled_output)
 
 # 加载数据
 def load_data(filename):
@@ -22,68 +37,47 @@ def prepare_dataset(contents, labels, tokenizer, max_len=256):
     for content in contents:
         encoded_dict = tokenizer.encode_plus(
             content,
-            add_special_tokens=True,      # 添加'[CLS]'和'[SEP]'
-            max_length=max_len,           # 填充 & 截断长度
-            padding='max_length',         # 填充至max_len
-            return_attention_mask=True,   # 构造 attn. masks
-            return_tensors='pt'           # 返回 pytorch tensors 格式的数据
+            add_special_tokens=True,
+            max_length=max_len,
+            padding='max_length',
+            return_attention_mask=True,
+            return_tensors='pt'
         )
         input_ids.append(encoded_dict['input_ids'])
         attention_masks.append(encoded_dict['attention_mask'])
 
     input_ids = torch.cat(input_ids, dim=0)
     attention_masks = torch.cat(attention_masks, dim=0)
-    labels = torch.tensor(labels.tolist())  # 将labels转换为列表
-
+    labels = torch.tensor(labels.tolist())
     return TensorDataset(input_ids, attention_masks, labels)
 
-# 设置模型
-def set_model(device, model_dir, num_labels=5):
-    tokenizer = BertTokenizer.from_pretrained(model_dir)
-    model = BertForSequenceClassification.from_pretrained(
-        model_dir,  
-        num_labels=num_labels,
-        output_attentions=False,
-        output_hidden_states=False,
-    )
-    model.to(device)
-    return model, tokenizer
-
-
-def train_and_validate(model, device, train_dataset, validation_dataset, epochs=4, batch_size=16, save_path='model_checkpoints'):
-    train_dataloader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
-    validation_dataloader = DataLoader(validation_dataset, sampler=SequentialSampler(validation_dataset), batch_size=batch_size)
-
-    optimizer = AdamW(model.parameters(), lr=2e-5, eps=1e-8)
-    total_steps = len(train_dataloader) * epochs
-    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=total_steps)
+def train_and_validate_multitask(model, device, train_datasets, validation_datasets, epochs=4, batch_size=16, save_path='model_checkpoints'):
+    optimizers = {task: AdamW(model.parameters(), lr=2e-5, eps=1e-8) for task in train_datasets.keys()}
+    schedulers = {task: get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=len(train_datasets[task]) * epochs / batch_size)
+                  for task, optimizer in optimizers.items()}
 
     for epoch in range(epochs):
-        model.train()
-        total_train_loss = 0
+        for task, data_loader in train_datasets.items():
+            model.train()
+            total_loss = 0
+            data_loader = DataLoader(data_loader, sampler=RandomSampler(data_loader), batch_size=batch_size)
+            progress_bar = tqdm(enumerate(data_loader), total=len(data_loader), desc=f"Epoch {epoch+1}, Task {task}")
 
-        for step, batch in enumerate(train_dataloader):
-            b_input_ids, b_input_mask, b_labels = batch
-            b_input_ids = b_input_ids.to(device)
-            b_input_mask = b_input_mask.to(device)
-            b_labels = b_labels.to(device)
-            
-            model.zero_grad()        
-            outputs = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask, labels=b_labels)
-            
-            loss = outputs.loss
-            total_train_loss += loss.item()
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
+            for step, batch in progress_bar:
+                b_input_ids, b_input_mask, b_labels = tuple(t.to(device) for t in batch)
+                model.zero_grad()
+                logits = model(b_input_ids, b_input_mask, task)
+                loss = nn.CrossEntropyLoss()(logits, b_labels)
+                total_loss += loss.item()
+                loss.backward()
+                optimizers[task].step()
+                schedulers[task].step()
 
-            if step % 10 == 0:
-                print(f"Epoch {epoch+1}, Step {step}, Loss: {loss.item()}")
+                progress_bar.set_postfix({'loss': loss.item()})
 
-        avg_train_loss = total_train_loss / len(train_dataloader)
-        print(f"Epoch {epoch+1}, Average Training Loss: {avg_train_loss}")
+            print(f"Task {task}, Epoch {epoch+1}, Average Loss: {total_loss / len(data_loader)}")
 
-        # 保存每20个epoch的checkpoint
+        # Save checkpoint every 20 epochs
         if (epoch + 1) % 20 == 0:
             checkpoint_path = os.path.join(save_path, f'checkpoint_epoch_{epoch+1}.pth')
             if not os.path.exists(save_path):
@@ -91,75 +85,30 @@ def train_and_validate(model, device, train_dataset, validation_dataset, epochs=
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': avg_train_loss,
+                'optimizer_state_dict': {task: optimizer.state_dict() for task, optimizer in optimizers.items()},
+                'loss': total_loss,
             }, checkpoint_path)
             print(f"Saved checkpoint for epoch {epoch+1} at '{checkpoint_path}'")
-
-        model.eval()
-        total_eval_loss = 0
-        total_eval_accuracy = 0
-
-        for batch in validation_dataloader:
-            b_input_ids, b_input_mask, b_labels = batch
-            b_input_ids = b_input_ids.to(device)
-            b_input_mask = b_input_mask.to(device)
-            b_labels = b_labels.to(device)
-
-            with torch.no_grad():
-                outputs = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask, labels=b_labels)
-            
-            loss = outputs.loss
-            total_eval_loss += loss.item()
-            logits = outputs.logits
-            logits = logits.detach().cpu().numpy()
-            label_ids = b_labels.to('cpu').numpy()
-            total_eval_accuracy += np.sum(np.argmax(logits, axis=1).flatten() == label_ids.flatten())
-
-        avg_val_accuracy = total_eval_accuracy / len(validation_dataset)
-        avg_val_loss = total_eval_loss / len(validation_dataloader)
-        print(f"Epoch {epoch+1}, Validation Accuracy: {avg_val_accuracy:.2f}")
-        print(f"Epoch {epoch+1}, Validation Loss: {avg_val_loss}")
 
 # 主程序
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print('Using device:', device)
 
-    # 假设你已经将数据准备好在以下路径
     contents, emotions, rationals = load_data('BV1bc411f7fK_updated.csv')
+    tokenizer = BertTokenizer.from_pretrained('Bert-Large-Chinese')
 
-    # 指定模型文件夹路径
-    model_dir = 'Bert-Large-Chinese'
+    # 准备数据集
+    datasets = {
+        'emotion': prepare_dataset(contents, emotions, tokenizer),
+        'rational': prepare_dataset(contents, rationals, tokenizer)
+    }
 
-    # 设置模型和分词器
-    model, tokenizer = set_model(device, model_dir, num_labels=5)
+    # 创建模型
+    model = BertForMultiTaskLearning('Bert-Large-Chinese', num_labels_emotion=5, num_labels_rational=5).to(device)
 
-    # 分割数据用于训练和验证
-    content_train, content_val, emotion_train, emotion_val = train_test_split(contents, emotions, test_size=0.1, random_state=42)
-    _, _, rational_train, rational_val = train_test_split(contents, rationals, test_size=0.1, random_state=42)
-    
-    # 准备训练和验证数据集
-    emotion_train_dataset = prepare_dataset(content_train, emotion_train, tokenizer)
-    emotion_val_dataset = prepare_dataset(content_val, emotion_val, tokenizer)
-    rational_train_dataset = prepare_dataset(content_train, rational_train, tokenizer)
-    rational_val_dataset = prepare_dataset(content_val, rational_val, tokenizer)
-    
-    # 训练和验证情感模型
-    print("Training and validating emotion model...")
-    train_and_validate(model, device, emotion_train_dataset, emotion_val_dataset)
-
-    # 重新设置模型，避免权重干扰
-    model, _ = set_model(device, model_dir, num_labels=5)
-
-    # 训练和验证理性模型
-    print("Training and validating rational model...")
-    train_and_validate(model, device, rational_train_dataset, rational_val_dataset)
-
-    print("Training complete!")
+    # 训练和验证
+    train_and_validate_multitask(model, device, datasets, datasets)  # 示例中使用相同数据集作为训练和验证
 
 if __name__ == "__main__":
     main()
-
-
-       
