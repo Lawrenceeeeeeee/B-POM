@@ -11,7 +11,6 @@ Bert-Large-Chinese.zip
 Bert-Large-Chinese/config.json
 Bert-Large-Chinese/gitattributes
 Bert-Large-Chinese/pytorch_model.bin
-Bert-Large-Chinese/README.md
 Bert-Large-Chinese/special_tokens_map.json
 Bert-Large-Chinese/tokenizer_config.json
 Bert-Large-Chinese/tokenizer.json

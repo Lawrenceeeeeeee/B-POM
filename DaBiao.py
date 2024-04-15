@@ -23,7 +23,7 @@ def update_csv_with_emotions(input_filename, output_filename):
         headers = next(reader, None)  # 获取列名
         if headers:
             content_index = headers.index('content')  # 获取"content"列的索引
-            headers.extend(['emotion', 'justice'])  # 添加新的列标题
+            headers.extend(['emotion', 'rational'])  # 添加新的列标题
         else:
             print("警告：CSV文件没有列名。")
             return

@@ -13,7 +13,7 @@ import numpy as np
 # 加载数据
 def load_data(filename):
     df = pd.read_csv(filename)
-    return df['content'], df['emotion'], df['justice']
+    return df['content'], df['emotion'], df['rational']
 
 # 准备数据集
 def prepare_dataset(contents, labels, tokenizer, max_len=256):
@@ -133,7 +133,7 @@ def main():
     print('Using device:', device)
 
     # 假设你已经将数据准备好在以下路径
-    contents, emotions, justices = load_data('BV1bc411f7fK_updated.csv')
+    contents, emotions, rational = load_data('BV1bc411f7fK_updated.csv')
 
     # 指定模型文件夹路径
     model_dir = 'Bert-Large-Chinese'
@@ -143,13 +143,13 @@ def main():
 
     # 分割数据用于训练和验证
     content_train, content_val, emotion_train, emotion_val = train_test_split(contents, emotions, test_size=0.1, random_state=42)
-    _, _, justice_train, justice_val = train_test_split(contents, justices, test_size=0.1, random_state=42)
+    _, _, rational_train, rational_val = train_test_split(contents, rationals, test_size=0.1, random_state=42)
     
     # 准备训练和验证数据集
     emotion_train_dataset = prepare_dataset(content_train, emotion_train, tokenizer)
     emotion_val_dataset = prepare_dataset(content_val, emotion_val, tokenizer)
-    justice_train_dataset = prepare_dataset(content_train, justice_train, tokenizer)
-    justice_val_dataset = prepare_dataset(content_val, justice_val, tokenizer)
+    rational_train_dataset = prepare_dataset(content_train, rational_train, tokenizer)
+    rational_val_dataset = prepare_dataset(content_val, rational_val, tokenizer)
     
     # 训练和验证情感模型
     print("Training and validating emotion model...")
@@ -159,8 +159,8 @@ def main():
     model, _ = set_model(device, model_dir, num_labels=5)
 
     # 训练和验证理性模型
-    print("Training and validating justice model...")
-    train_and_validate(model, device, justice_train_dataset, justice_val_dataset)
+    print("Training and validating rational model...")
+    train_and_validate(model, device, rational_train_dataset, rational_val_dataset)
 
     print("Training complete!")
 
