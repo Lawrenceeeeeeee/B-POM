@@ -68,24 +68,18 @@ def get_comments(type, oid, sort=0, nohot=0, ps=20, pn=1):
             new_row = pd.DataFrame(new_row, index=[0])
             df = pd.concat([df, new_row], ignore_index=True)
             
-        # comments = [item['content']['message'] for item in res['data']['replies']] if res['data']['replies'] else []
-        
-        # print(json.dumps(res, indent=4))
-        # with open('output.txt', 'a') as f:
-        #     f.write(json.dumps(res, indent=4))
-        # print(response.text)
-        # print(comments)
         return df
     else:
         print("Failed to fetch data. Status code:", response.status_code)
         return None
-        
-def get_full_comments(type, oid, sort=0, nohot=0, ps=20):
+   
+     
+def get_full_comments(type, bv, sort=0, nohot=0, ps=20, sample_size=None):
     """获取指定b站视频所有评论
 
     Args:
         type (_type_): 评论区类型代码
-        oid (_type_): 视频av号
+        bv (_type_): 视频bv号
         sort (int, optional): 排序方式，默认为0。0：按时间；1：按点赞数；2：按回复数.
         nohot (int, optional): 是否不显示热评. 默认为0.
         ps (int, optional): 每页项数（1-20）. Defaults to 20.
@@ -122,10 +116,10 @@ def get_full_comments(type, oid, sort=0, nohot=0, ps=20):
     | 22   | 漫画                    | 漫画 mcid   |
     | 33   | 课程                    | 课程 epid   |
     """
+
     page = 1
-    # comment_list = []
-    # 时间戳、用户id、用户名、评论内容、点赞数、回复数
     df = pd.DataFrame(columns=columns)
+    oid = bvav.bv2av(bv)
     
     while True:
         res = get_comments(type, oid, sort, nohot, ps, page)
@@ -135,16 +129,18 @@ def get_full_comments(type, oid, sort=0, nohot=0, ps=20):
         page += 1
         # time.sleep(1) # 如果被ban了就取消这个注释
     
-    with open('BV1bc411f7fK.csv', 'a') as f:
+    if sample_size and sample_size < df.shape[0]:
+        df = df.sample(n=sample_size)
+    
+    with open(f'{bv}.csv', 'a') as f:
         df.to_csv(f, header=True, encoding='utf-8')
         
         
     return df
 
 
-
     
-print(get_full_comments('1', av, 0, 0, 20).head())
+
 # print(len(comment_list))
 
 
