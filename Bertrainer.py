@@ -1,3 +1,6 @@
+# 将Bert-Large-Chinese解压到当前目录下
+# 既可使用本训练程序
+
 import torch
 import os
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
