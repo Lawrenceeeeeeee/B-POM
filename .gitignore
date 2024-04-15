@@ -7,3 +7,12 @@ output.txt
 /.idea/Python_BDA_NLP.iml
 /.idea/vcs.xml
 BV1bc411f7fK.csv
+Bert-Large-Chinese.zip
+Bert-Large-Chinese/config.json
+Bert-Large-Chinese/gitattributes
+Bert-Large-Chinese/pytorch_model.bin
+Bert-Large-Chinese/README.md
+Bert-Large-Chinese/special_tokens_map.json
+Bert-Large-Chinese/tokenizer_config.json
+Bert-Large-Chinese/tokenizer.json
+Bert-Large-Chinese/vocab.txt
