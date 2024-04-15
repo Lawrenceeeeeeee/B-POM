@@ -42,9 +42,6 @@ def open_readme_in_browser():
 
     
 
-# 调用函数
-open_readme_in_browser()
-
 css = """
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 body {
@@ -74,16 +71,16 @@ input, textarea, button {
 .markdown h1 {  /* 这里假设 Markdown 中使用了一级标题 */
     font-size: 42px;  /* 调整字体大小 */
 }
-
 h1, h2 {
     text-align: center;
     color: #4CAF50;
 }
 """
 
-with gr.Blocks(css=css) as web:
+with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
     
     with gr.Column():
+        gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("# 基于评论情感判断的舆情监测系统")
     gr.Markdown("<!-- 这是一个空行 -->")
     gr.Markdown("<!-- 这是一个空行 -->")
