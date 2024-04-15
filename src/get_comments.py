@@ -54,6 +54,9 @@ def get_comments(type, oid, sort=0, nohot=0, ps=20, pn=1):
         df = pd.DataFrame(columns=columns)
         # Print the content of the response (body)
         results = json.loads(response.text)
+        if results['code'] != 0:
+            print("Failed to fetch data. Error message:", results['message'])
+            return None
         for result in results['data']['replies']:
             new_row = {
                 'oid': oid,
@@ -120,15 +123,21 @@ def get_full_comments(type, bv, sort=0, nohot=0, ps=20, sample_size=None):
     page = 1
     df = pd.DataFrame(columns=columns)
     oid = bvav.bv2av(bv)
-    
+
     while True:
-        res = get_comments(type, oid, sort, nohot, ps, page)
+        try:
+            res = get_comments(type, oid, sort, nohot, ps, page)
+        except Exception as e:
+            print("Failed to fetch data. Error message:", e)
+            break
+        if res is None:
+            break
         if res.empty:
             break
         df = pd.concat([df, res], ignore_index=True)
         page += 1
         # time.sleep(1) # 如果被ban了就取消这个注释
-    
+        
     if sample_size and sample_size < df.shape[0]:
         df = df.sample(n=sample_size)
     
@@ -138,6 +147,8 @@ def get_full_comments(type, bv, sort=0, nohot=0, ps=20, sample_size=None):
         
     return df
 
+    
+    
 
     
 
