@@ -90,25 +90,20 @@ def train_and_validate_multitask(model, device, train_datasets, validation_datas
             }, checkpoint_path)
             print(f"Saved checkpoint for epoch {epoch+1} at '{checkpoint_path}'")
 
-# 主程序
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print('Using device:', device)
-
     contents, emotions, rationals = load_data('BV1bc411f7fK_updated.csv')
     tokenizer = BertTokenizer.from_pretrained('Bert-Large-Chinese')
-
     # 准备数据集
     datasets = {
         'emotion': prepare_dataset(contents, emotions, tokenizer),
         'rational': prepare_dataset(contents, rationals, tokenizer)
     }
-
     # 创建模型
     model = BertForMultiTaskLearning('Bert-Large-Chinese', num_labels_emotion=5, num_labels_rational=5).to(device)
-
     # 训练和验证
     train_and_validate_multitask(model, device, datasets, datasets)  # 示例中使用相同数据集作为训练和验证
-
+    
 if __name__ == "__main__":
     main()
