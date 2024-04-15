@@ -1,1 +1,4 @@
 output.txt
+.DS_Store
+.gitignore
+__pycache__/simulate.cpython-311.pyc
