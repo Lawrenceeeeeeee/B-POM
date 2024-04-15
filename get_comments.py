@@ -14,6 +14,7 @@ app_sec = "c2ed53a74eeefe3cf99fbd01d8c9c375"
 bv = "BV1bc411f7fK"
 av = bvav.bv2av(bv)
 
+columns = ['timestamp', 'uid', 'uname', 'content', 'likes', 'replies']
 
 def get_comments(type, oid, sort=0, nohot=0, ps=20, pn=1):
     
@@ -50,16 +51,29 @@ def get_comments(type, oid, sort=0, nohot=0, ps=20, pn=1):
     
     # Check if the request was successful
     if response.status_code == 200:
+        df = pd.DataFrame(columns=columns)
         # Print the content of the response (body)
-        res = json.loads(response.text)
-        comments = [item['content']['message'] for item in res['data']['replies']] if res['data']['replies'] else []
+        results = json.loads(response.text)
+        for result in results['data']['replies']:
+            new_row = {
+                'timestamp': result['ctime'],
+                'uid': result['mid'],
+                'uname': result['member']['uname'],
+                'content': result['content']['message'],
+                'likes': result['like'],
+                'replies': result['count'],
+            }
+            new_row = pd.DataFrame(new_row, index=[0])
+            df = pd.concat([df, new_row], ignore_index=True)
+            
+        # comments = [item['content']['message'] for item in res['data']['replies']] if res['data']['replies'] else []
         
         # print(json.dumps(res, indent=4))
-        with open('output.txt', 'a') as f:
-            f.write(json.dumps(res, indent=4))
+        # with open('output.txt', 'a') as f:
+        #     f.write(json.dumps(res, indent=4))
         # print(response.text)
         # print(comments)
-        return comments
+        return df
     else:
         print("Failed to fetch data. Status code:", response.status_code)
         return None
@@ -107,24 +121,28 @@ def get_full_comments(type, oid, sort=0, nohot=0, ps=20):
     | 33   | 课程                    | 课程 epid   |
     """
     page = 1
-    comment_list = []
+    # comment_list = []
     # 时间戳、用户id、用户名、评论内容、点赞数、回复数
-    df = pd.DataFrame(columns=['timestamp', 'uid', 'uname', 'content', 'likes', 'replies'])
+    df = pd.DataFrame(columns=columns)
     
     while True:
         res = get_comments(type, oid, sort, nohot, ps, page)
-        if not res:
+        if res.empty:
             break
-        comment_list += res
+        df = pd.concat([df, res], ignore_index=True)
         page += 1
         # time.sleep(1) # 如果被ban了就取消这个注释
+    
+    with open('BV1bc411f7fK.csv', 'a') as f:
+        df.to_csv(f, header=True, encoding='utf-8')
         
-    return comment_list
+        
+    return df
 
 
 
     
-print(get_full_comments('1', av, 0, 0, 20))
+print(get_full_comments('1', av, 0, 0, 20).head())
 # print(len(comment_list))
 
 
