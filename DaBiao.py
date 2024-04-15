@@ -8,14 +8,15 @@ def validate_input(prompt):
         else:
             print("输入错误，请输入一个1-5之间的整数。")
 
-def update_csv_with_emotions(input_filename, output_filename, progress_filename):
+def update_csv_with_emotions(input_filename, output_filename):
+    progress_filename = input_filename.replace('.csv', '_progress.txt')  # 为每个输入文件设置一个进度文件
     start_row = 0
     # 尝试读取进度文件
     try:
         with open(progress_filename, 'r') as f:
             start_row = int(f.read())
     except FileNotFoundError:
-        pass  # 如果文件不存在，从头开始
+        pass  # 如果文件不存在从头开始
 
     with open(input_filename, mode='r', newline='', encoding='utf-8') as infile:
         reader = csv.reader(infile)
@@ -44,13 +45,7 @@ def update_csv_with_emotions(input_filename, output_filename, progress_filename)
                 with open(progress_filename, 'w') as f:
                     f.write(str(i))
 
-# 调用函数，需要指定输入文件、输出文件和进度文件的路径
-input_filename = 'BV1bc411f7fK.csv'
-output_filename = input_filename.replace('.csv', '_updated.csv')
-progress_filename = 'progress.txt'
-update_csv_with_emotions(input_filename, output_filename, progress_filename)
-# 调用函数，需要指定输入文件和输出文件的路径
+# 调用函数，需要指定输入文件、输出文件的路径
 input_filename = 'BV1bc411f7fK.csv'
 output_filename = input_filename.replace('.csv', '_updated.csv')
 update_csv_with_emotions(input_filename, output_filename)
-
