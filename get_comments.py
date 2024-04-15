@@ -14,7 +14,7 @@ app_sec = "c2ed53a74eeefe3cf99fbd01d8c9c375"
 bv = "BV1bc411f7fK"
 av = bvav.bv2av(bv)
 
-columns = ['timestamp', 'uid', 'uname', 'content', 'likes', 'replies']
+columns = ['oid','timestamp', 'rpid', 'uid', 'uname', 'content', 'likes', 'replies']
 
 def get_comments(type, oid, sort=0, nohot=0, ps=20, pn=1):
     
@@ -56,7 +56,9 @@ def get_comments(type, oid, sort=0, nohot=0, ps=20, pn=1):
         results = json.loads(response.text)
         for result in results['data']['replies']:
             new_row = {
+                'oid': oid,
                 'timestamp': result['ctime'],
+                'rpid': result['rpid'], # 'rpid_str': '0', 'root': '0', '
                 'uid': result['mid'],
                 'uname': result['member']['uname'],
                 'content': result['content']['message'],
