@@ -49,12 +49,6 @@ def set_model(device, model_dir, num_labels=5):
     model.to(device)
     return model, tokenizer
 
-# 训练和验证模型
-import os
-import torch
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from transformers import get_linear_schedule_with_warmup
-from torch.optim import AdamW
 
 def train_and_validate(model, device, train_dataset, validation_dataset, epochs=4, batch_size=16, save_path='model_checkpoints'):
     train_dataloader = DataLoader(train_dataset, sampler=RandomSampler(train_dataset), batch_size=batch_size)
@@ -133,7 +127,7 @@ def main():
     print('Using device:', device)
 
     # 假设你已经将数据准备好在以下路径
-    contents, emotions, rational = load_data('BV1bc411f7fK_updated.csv')
+    contents, emotions, rationals = load_data('BV1bc411f7fK_updated.csv')
 
     # 指定模型文件夹路径
     model_dir = 'Bert-Large-Chinese'
