@@ -2,7 +2,7 @@ import gradio as gr
 import webbrowser
 import os
 import pandas as pd
-from simulate import generate_image
+from examples.simulate import generate_image
 
 # CSV 文件路径
 csv_file = 'data.csv'
@@ -86,9 +86,9 @@ with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
     gr.Markdown("<!-- 这是一个空行 -->")
     with gr.Row():
         with gr.Column(scale=1):
-            recom_button1 = gr.Button(value="项目介绍",class_name="button-small")
+            recom_button1 = gr.Button(value="项目介绍")
             recom_button1.click(open_readme_in_browser)
-            recom_button2 = gr.Button(value="使用说明",class_name="button-small")
+            recom_button2 = gr.Button(value="使用说明")
         with gr.Column(scale=30):
             input_bv = gr.Textbox(label="请输入视频的BV值")
         
