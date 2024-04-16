@@ -9,14 +9,14 @@ csv_file = 'data.csv'
 
 # 如果文件不存在，创建文件并添加列名
 if not os.path.exists(csv_file):
-    df = pd.DataFrame(columns=['BV', 'Record'])
+    df = pd.DataFrame(columns=['BV号', 'Record'])
     df.to_csv(csv_file, index=False)
 
 def write_to_csv(bv, record):
     # 加载现有的 CSV 文件
     df = pd.read_csv(csv_file)
     # 添加新的数据行
-    df = df.append({'BV': bv, 'Record': record}, ignore_index=True)
+    df = df.append({'BV号': bv, 'Record': record}, ignore_index=True)
     # 保存更新后的 CSV 文件
     df.to_csv(csv_file, index=False)
     return "数据已写入!"
@@ -83,7 +83,7 @@ with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
             recom_button1.click(open_readme_in_github)
             recom_button2 = gr.Button(value="使用说明")
         with gr.Column(scale=30):
-            input_bv = gr.Textbox(label="请输入视频的BV值")
+            input_bv = gr.Textbox(label="请输入视频的BV号")
         
     with gr.Column():
         
