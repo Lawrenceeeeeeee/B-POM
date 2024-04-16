@@ -25,20 +25,13 @@ def wrapper_function(bv):
     image_path = generate_image(bv)
     return image_path
 
-def open_readme_in_browser():
-    # 设置 README 文件的名称
-    filename = "README.md"
-    # 获取当前工作目录的路径
-    current_directory = os.getcwd()
-    # 构造完整的文件路径
-    full_path = os.path.join(current_directory, filename)
+def open_readme_in_github():
+    # 设置 GitHub 仓库中的 README 文件的 URL
+    url = "https://github.com/Lawrenceeeeeeee/big-data-finance-5-nlp/blob/main/README.md"
     
-    # 检查文件是否存在
-    if os.path.exists(full_path):
-        # 使用默认浏览器打开文件
-        webbrowser.open(f"file://{full_path}")
-    else:
-        pass
+    # 使用默认浏览器打开 URL
+    webbrowser.open(url)
+
 
     
 
@@ -87,7 +80,7 @@ with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
     with gr.Row():
         with gr.Column(scale=1):
             recom_button1 = gr.Button(value="项目介绍")
-            recom_button1.click(open_readme_in_browser)
+            recom_button1.click(open_readme_in_github)
             recom_button2 = gr.Button(value="使用说明")
         with gr.Column(scale=30):
             input_bv = gr.Textbox(label="请输入视频的BV值")
