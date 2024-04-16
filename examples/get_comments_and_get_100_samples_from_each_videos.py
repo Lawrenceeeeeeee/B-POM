@@ -5,6 +5,6 @@ from src import get_comments as gc
 from src import videos
 
 
-for video in videos.video_list[8:]: 
+for video in videos.sci_videos: 
     gc.get_full_comments(1, video, sample_size=100)
     print("Got 100 samples from video " + video + ".")
