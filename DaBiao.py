@@ -16,6 +16,7 @@ def main():
     # 用户输入CSV文件名
     filename = input("请输入需要打标的CSV文件名（包括.csv扩展名）: ")
     progress_file = filename + '_progress.txt'  # 进度跟踪文件名
+    updated_filename = filename.split('.csv')[0] + '_updated.csv'  # 生成的新文件名
 
     # 尝试加载进度文件来找到上次的索引
     try:
@@ -43,12 +44,11 @@ def main():
         df.at[index, 'bool_taolun'] = get_valid_input("这是否为讨论帖 (1不属于, 2属于): ", [1, 2])
         df.at[index, 'bool_wangeng'] = get_valid_input("这是否为玩梗帖 (1不属于, 2属于): ", [1, 2])
         
-        # 保存当前进度
+        # 保存当前进度和数据
         with open(progress_file, 'w') as f:
             f.write(str(index))
+        df.to_csv(updated_filename, index=False)  # 实时保存更新的数据到新文件
     
-    # 保存更新后的 DataFrame
-    df.to_csv(filename, index=False)
     print("打标完成，所有数据已更新。")
 
 if __name__ == "__main__":
