@@ -54,6 +54,6 @@ def update_csv_with_tags(input_filename, output_filename):
                     f.write(str(i))
 
 # 调用函数，需要指定输入文件、输出文件的路径
-input_filename = 'BV1i6421g7K7.csv'
+input_filename = 'data/BV1aC411G7jT.csv'
 output_filename = input_filename.replace('.csv', '_updated.csv')
 update_csv_with_tags(input_filename, output_filename)

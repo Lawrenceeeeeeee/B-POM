@@ -1,4 +1,5 @@
 import pandas as pd
+from colorama import Fore, Style
 
 def get_valid_input(prompt, valid_range):
     """ 获取并验证用户输入，确保它在有效范围内 """
@@ -37,7 +38,7 @@ def main():
 
     # 处理每一行数据
     for index, row in df.iloc[start_index:].iterrows():
-        print(f"内容: {row['content']}")
+        print(Fore.GREEN + f"{index} 内容" + Fore.RESET + f": {row['content']}")
         df.at[index, 'index_qingxu'] = get_valid_input("请输入情绪分类指标 (1消极, 2中立, 3积极): ", [1, 2, 3])
         df.at[index, 'index_manyi'] = get_valid_input("请输入观众满意指标 (1不满, 2不在意, 3满意): ", [1, 2, 3])
         df.at[index, 'bool_tiwen'] = get_valid_input("这是否为提问贴 (1不属于, 2属于): ", [1, 2])
