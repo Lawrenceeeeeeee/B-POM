@@ -16,7 +16,7 @@ video_list = [
     "BV1Mp421X7Wx", # 当我带老爸欣赏弱智吧语录，看完感觉我才是弱智
     "BV1zC411G7aG", # 跟大家聊聊猫一杯吧，这种短视频风气我实在不吐不快
     "BV1hz421C7BH", #
-    "BV1aC411G7jT",
+    "BV1aC411G7jT", #
     "BV18H4y1K7RW",
     "BV1bA4m1c7F1",
     "BV11m411z7rx",
