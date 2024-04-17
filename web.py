@@ -4,27 +4,9 @@ import os
 import pandas as pd
 from examples.simulate import generate_image
 
-# CSV 文件路径
-csv_file = 'data.csv'
 
-# 如果文件不存在，创建文件并添加列名
-if not os.path.exists(csv_file):
-    df = pd.DataFrame(columns=['BV号', 'Record'])
-    df.to_csv(csv_file, index=False)
 
-def write_to_csv(bv, record):
-    # 加载现有的 CSV 文件
-    df = pd.read_csv(csv_file)
-    # 添加新的数据行
-    df = df.append({'BV号': bv, 'Record': record}, ignore_index=True)
-    # 保存更新后的 CSV 文件
-    df.to_csv(csv_file, index=False)
-    return "数据已写入!"
-
-def wrapper_function(bv):
-    image_path = generate_image(bv)
-    return image_path
-
+# 项目介绍文件的函数
 def open_readme_in_github():
     # 设置 GitHub 仓库中的 README 文件的 URL
     url = "https://github.com/Lawrenceeeeeeee/big-data-finance-5-nlp/blob/main/README.md"
@@ -33,6 +15,26 @@ def open_readme_in_github():
     webbrowser.open(url)
 
 
+
+
+
+# 记录日志的函数
+def write_to_csv(bv, record):
+    # 定义文件名，包括 BV 号
+    filename = f'data/{bv}_records.csv'
+    
+    # 检查文件是否存在，不存在则创建并初始化列名
+    if not os.path.exists(filename):
+        df = pd.DataFrame(columns=['BV号', 'Record'])
+    else:
+        # 加载现有的 CSV 文件
+        df = pd.read_csv(filename)
+    
+    # 添加新的数据行
+    df = df.append({'BV号': bv, 'Record': record}, ignore_index=True)
+    # 保存更新后的 CSV 文件
+    df.to_csv(filename, index=False)
+    return f"数据已写入到 {filename}!"
     
 
 css = """
@@ -55,15 +57,17 @@ input, textarea, button {
     margin-bottom: 10px; /* 增加底部边距以分隔组件 */
     text-align: center; /* 文本居中 */
 }
-.button-small {
-    height: 40px;
-    font-size: 14px;
-    width: 150px;
-    background-color: lightblue; /* 示例背景色 */
+
+.button-large {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
 }
-.markdown h1 {  /* 这里假设 Markdown 中使用了一级标题 */
-    font-size: 42px;  /* 调整字体大小 */
-}
+
 h1, h2 {
     text-align: center;
     color: #4CAF50;
@@ -81,9 +85,14 @@ with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
         with gr.Column(scale=1):
             recom_button1 = gr.Button(value="项目介绍")
             recom_button1.click(open_readme_in_github)
-            recom_button2 = gr.Button(value="使用说明")
+            recom_button2 = gr.Button(value="开始爬取")
+            #recom_button2.click(fn=start_crawling, inputs=input_bv, outputs=crawl_result)
+
         with gr.Column(scale=30):
             input_bv = gr.Textbox(label="请输入视频的BV号")
+    crawl_result = gr.Textbox(label="爬取结果", interactive=False)
+                
+
         
     with gr.Column():
         
@@ -94,12 +103,12 @@ with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
                 with gr.Column():
                     output_img1 = gr.Image(label="词频统计")
                     submit_button1 = gr.Button("词频分析")
-                    # submit_button1.click()
+                    #submit_button1.click(fn=frec_out,inputs=[],outputs=output_img1)
             with gr.Column():
                 with gr.Column():
                     output_img2 = gr.Image(label="词云统计")
                     submit_button2 = gr.Button("词云展示")
-                    # submit_button2.click()
+                    #submit_button2.click(fn=frec_plt,inputs=[],outputs=output_img2)
         gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("## 舆情变化时序统计")
