@@ -1,6 +1,6 @@
 import requests
 import os
-import bvav
+import src.bvav as bvav
 import json
 import time
 import pandas as pd
