@@ -1,5 +1,7 @@
 import requests
 import json
+import subprocess
+
 SESSDATA = 'f7d22332%2C1728481618%2Cf242a%2A41CjBLPbnBWSHKva1n24Wnxt-G4dxI7CA89KIX2tcS7zVz6VFvUVwj-hvU96ZCR68-kFESVjlsc0NOMi10ZUNpRGFNRnJyNXNHTEpLbzMzaTJSeV93aGpKRFRLUk5wRFpLdzFvcjFRZFZ6alAzLUJkZkVIUTFVMVh2WjVJV1p6eXhrVUhqelVIc3lRIIEC'
 
 def get_cid(bv=None, av=None):
@@ -26,13 +28,13 @@ def get_cid(bv=None, av=None):
         print("Failed to fetch data. Status code:", response.status_code)
         return None
 
-def get_video_url(bvid, cid, quality=112):
+def get_video_url(bvid, cid, quality=32):
     api_url = 'https://api.bilibili.com/x/player/playurl'
     params = {
         'bvid': bvid,
         'cid': cid,
         'qn': quality,
-        'fnval': 0,
+        'fnval': 1,
         'fnver': 0,
         'fourk': 1
     }
@@ -40,11 +42,42 @@ def get_video_url(bvid, cid, quality=112):
     headers = {'User-Agent': 'Mozilla/5.0'}
     response = requests.get(api_url, params=params, cookies=cookies, headers=headers)
     data = response.json()
-    return data
+    return data['data']['durl'][0]['backup_url'][0]
+
+def get_dash_urls(bvid, cid, quality=32):
+    api_url = 'https://api.bilibili.com/x/player/playurl'
+    params = {
+        'bvid': bvid,
+        'cid': cid,
+        'qn': quality,
+        'fnval': 16,  # 使用16表示请求DASH格式
+        'fnver': 0,
+        'fourk': 1
+    }
+    cookies = {'SESSDATA': SESSDATA}
+    headers = {
+        'User-Agent': 'Mozilla/5.0',  # 可以根据需要调整为APP端User-Agent
+        'Referer': 'https://www.bilibili.com'
+    }
+    response = requests.get(api_url, params=params, cookies=cookies, headers=headers)
+    data = response.json()
+    video_url = data.get('data', {}).get('dash', {}).get('video', [])[0].get('baseUrl')
+    audio_url = data.get('data', {}).get('dash', {}).get('audio', [])[0].get('baseUrl')
+    return video_url, audio_url
+
+def download_file(url, output_filename):
+    command = ['wget', url, '--referer', 'https://www.bilibili.com', '-O', output_filename]
+    # 通过ffmpeg转成wav
+    
+    subprocess.run(command)
+    command = ['ffmpeg', '-i', output_filename, output_filename[:-4] + '.wav']
+    subprocess.run(command)
 
 if __name__ == '__main__':
     # 【【官方双语】深度学习之神经网络的结构 Part 1 ver 2.0】 https://www.bilibili.com/video/BV1bx411M7Zx/?share_source=copy_web&vd_source=9e94008dbf76e399a164028430118348
     bvid = 'BV1bx411M7Zx'
     cid = 25368631
-    print(json.dumps(get_video_url(bvid, cid), indent=2))
+    audio_url = get_dash_urls(bvid, cid)[1]
+    # print(json.dumps(get_dash_urls(bvid, cid), indent=4))
     # print(json.dumps(get_cid(av=bvid), indent=4))
+    download_file(audio_url, 'audio.m4a')
