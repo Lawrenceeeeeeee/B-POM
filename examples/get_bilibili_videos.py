@@ -66,11 +66,12 @@ def get_dash_urls(bvid, cid, quality=32):
     return video_url, audio_url
 
 def download_file(url, output_filename):
-    command = ['wget', url, '--referer', 'https://www.bilibili.com', '-O', output_filename]
+    command = ['wget', url, '--referer', 'https://www.bilibili.com', '-O', f"{output_filename}.m4a"]
     # 通过ffmpeg转成wav
     
     subprocess.run(command)
-    command = ['ffmpeg', '-i', output_filename, output_filename[:-4] + '.wav']
+    command = ['ffmpeg', '-i', f"{output_filename}.m4a", '-ar', '16000', output_filename + '.wav']
+
     subprocess.run(command)
 
 if __name__ == '__main__':
@@ -80,4 +81,4 @@ if __name__ == '__main__':
     audio_url = get_dash_urls(bvid, cid)[1]
     # print(json.dumps(get_dash_urls(bvid, cid), indent=4))
     # print(json.dumps(get_cid(av=bvid), indent=4))
-    download_file(audio_url, 'audio.m4a')
+    download_file(audio_url, bvid)
