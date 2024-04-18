@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from transformers import BertTokenizer, BertForSequenceClassification, get_scheduler
 from tqdm import tqdm
 import pandas as pd
+from sklearn.metrics import accuracy_score
 
 class SentimentModelTrainer:
     def __init__(self, model_path, tokenizer, filepath, split_ratio=0.8):
@@ -19,8 +20,12 @@ class SentimentModelTrainer:
     def load_and_split_data(self):
         # 读取数据并处理NaN值
         df = pd.read_csv(self.filepath)
+        initial_count = df.shape[0]
         df.dropna(subset=['content', 'index_qingxu'], inplace=True)  # 删除任何含有NaN的行
+        final_count = df.shape[0]
         df['index_qingxu'] = df['index_qingxu'].apply(lambda x: int(x) - 1)  # 转换标签
+
+        print(f"Initial data rows: {initial_count}, After NaN removal: {final_count}")  # 输出数据条数
 
         texts = df['content'].tolist()
         labels = df['index_qingxu'].tolist()
@@ -54,6 +59,30 @@ class SentimentModelTrainer:
                 loop.set_description(f'Epoch {epoch + 1}')
                 loop.set_postfix(loss=loss.item())
 
+            # Evaluate the model after each epoch
+            self.evaluate(batch_size)
+
+    def evaluate(self, batch_size):
+        test_loader = DataLoader(self.test_dataset, batch_size=batch_size)
+        self.model.eval()
+        true_labels = []
+        predictions = []
+
+        with torch.no_grad():
+            for batch in test_loader:
+                input_ids = batch['input_ids'].to(self.device)
+                attention_mask = batch['attention_mask'].to(self.device)
+                labels = batch['labels'].to(self.device)
+                outputs = self.model(input_ids, attention_mask=attention_mask)
+
+                logits = outputs.logits
+                predicted_labels = torch.argmax(logits, dim=1)
+                predictions.extend(predicted_labels.cpu().numpy())
+                true_labels.extend(labels.cpu().numpy())
+
+        accuracy = accuracy_score(true_labels, predictions)
+        print(f"Test Accuracy: {accuracy}")
+
     def save_model(self, save_path):
         self.model.save_pretrained(save_path)
         print(f"模型已保存到{save_path}。")
@@ -81,7 +110,7 @@ class SentimentDataset(Dataset):
 # 使用示例
 model_path = 'Bert-Large-Chinese'
 tokenizer = BertTokenizer.from_pretrained(model_path)
-filepath = 'tag_data\\traindata.csv'
+filepath = 'path_to_your_csv.csv'
 trainer = SentimentModelTrainer(model_path, tokenizer, filepath)
 trainer.train()
 trainer.save_model('Bert-updated-qingxu')
