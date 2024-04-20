@@ -2,8 +2,8 @@ import requests
 import json
 import subprocess
 import os
-import transcribe as tr
-import embedding as emb
+import src.transcribe as tr
+import src.embedding as emb
 from openai import OpenAI
 
 client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])

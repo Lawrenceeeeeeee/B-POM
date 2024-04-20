@@ -11,8 +11,8 @@ app_sec = "c2ed53a74eeefe3cf99fbd01d8c9c375"
 
 
 
-bv = "BV1bc411f7fK"
-av = bvav.bv2av(bv)
+# bv = "BV1bc411f7fK"
+# av = bvav.bv2av(bv)
 
 columns = ['oid','timestamp', 'rpid', 'uid', 'uname', 'content', 'likes', 'replies']
 
@@ -145,7 +145,7 @@ def get_full_comments(type, bv, sort=0, nohot=0, ps=20, sample_size=None):
         df.to_csv(f, header=True, encoding='utf-8')
         
         
-    return df
+    # return df
 
     
     
