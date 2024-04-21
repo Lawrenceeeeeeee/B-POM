@@ -2,9 +2,9 @@ import gradio as gr
 import webbrowser
 import os
 import pandas as pd
-from qingxu_plot import generate_emotion_chart
-from count_plot  import generate_comment_count_chart
-from corr_plot import create_heatmap_plotly
+from src.qingxu_plot import generate_emotion_chart
+from src.count_plot  import generate_comment_count_chart
+from src.corr_plot import create_heatmap_plotly
 
 # 项目介绍文件的函数
 def open_readme_in_github():
