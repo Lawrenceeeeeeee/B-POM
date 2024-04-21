@@ -141,11 +141,14 @@ def get_full_comments(type, bv, sort=0, nohot=0, ps=20, sample_size=None):
     if sample_size and sample_size < df.shape[0]:
         df = df.sample(n=sample_size)
     
-    with open(f'{bv}.csv', 'a') as f:
-        df.to_csv(f, header=True, encoding='utf-8')
-        
-        
-    # return df
+    # current_dir = os.path.dirname(os.path.abspath(__file__))
+    # # 保存原始工作目录
+    # original_cwd = os.getcwd()
+    # # 更改工作目录到函数所在文件目录
+    # os.chdir(current_dir)
+    # with open(f'temp/{bv}.csv', 'a') as f:
+    #     df.to_csv(f, header=True, encoding='utf-8')
+    return df
 
     
     
@@ -154,5 +157,8 @@ def get_full_comments(type, bv, sort=0, nohot=0, ps=20, sample_size=None):
 
 # print(len(comment_list))
 
-
+if __name__ == "__main__":
+    # print(get_comments('1', av, 0, 0, 20, 1))
+    print(get_full_comments('1', 'BV1bc411f7fK').head())
+    # print(get_comments('1', av, 0, 0, 20, 1))
 # print(get_comments('1', av, 0, 0, 20, 1))
