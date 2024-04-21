@@ -6,13 +6,16 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontManager
 
 class word_freq:
-    def __init__(self, data_dir='data'):
+    def __init__(self, comments, data_dir='data'):
+        self.comments = comments
         self.crawler_dir = os.path.join(data_dir, 'crawler')
         self.freq_dir = os.path.join(data_dir, 'word_frequencies')
         self.plot_dir = os.path.join(data_dir, 'frequency_plots')
         os.makedirs(self.freq_dir, exist_ok=True)
         os.makedirs(self.plot_dir, exist_ok=True)
         self.font = self.get_chinese_font()
+
+        self.stopwords_path = os.path.join(data_dir, 'cn_stopwords.txt')
 
     def get_chinese_font(self):
         """Identify the best available Chinese font."""
@@ -22,10 +25,11 @@ class word_freq:
                 return font.name
         return 'SimHei'  # Default to SimHei if no preferred font is found
 
-    def process_text_data(self, input_csv, stopwords_path, output_csv='frequencies.csv'):
-        input_path = os.path.join(self.crawler_dir, input_csv)
-        df = pd.read_csv(input_path)
-        with open(stopwords_path, 'r', encoding='utf-8') as file:
+    def process_text_data(self):
+        # input_path = os.path.join(self.crawler_dir, input_csv)
+        # df = pd.read_csv(input_path)
+        df = self.comments
+        with open(self.stopwords_path, 'r', encoding='utf-8') as file:
             stopwords = set(file.read().splitlines())
         
         df['content_cleaned'] = df['content'].apply(lambda x: x.replace(" ", "").replace("\t", "").replace("\n", ""))
@@ -34,10 +38,10 @@ class word_freq:
         all_words = [word for sublist in df['words_filtered'] for word in sublist]
         word_freq = Counter(all_words)
         
-        output_path = os.path.join(self.freq_dir, output_csv)
+        # output_path = os.path.join(self.freq_dir, output_csv)
         df_word_freq = pd.DataFrame(word_freq.items(), columns=['Word', 'Frequency'])
         df_word_freq.sort_values('Frequency', ascending=False, inplace=True)
-        df_word_freq.to_csv(output_path, index=False)
+        # df_word_freq.to_csv(output_path, index=False)
 
         # Generate frequency plot
         plt.rcParams['font.sans-serif'] = [self.font]  # Use identified Chinese font
@@ -52,7 +56,7 @@ class word_freq:
         plt_path = os.path.join(self.plot_dir, 'freq_plot.png')
         plt.savefig(plt_path)
         plt.close()
-        return output_path, plt_path
+        return df_word_freq, plt_path
 
 
 
