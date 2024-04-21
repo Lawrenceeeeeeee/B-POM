@@ -140,7 +140,7 @@ def get_video_summary(bvid):
 
 def comment_correlation(comment, parts_sum):
     corr = 0
-    corr = max([emb.cosine_similarity(emb.embedding(comment), emb.embedding(item)) for item in parts_sum])
+    corr = max([emb.cosine_similarity(comment, item) for item in parts_sum])
     # for item in parts_sum:
     #     corr += emb.cosine_similarity(emb.embedding(comment), emb.embedding(item))
     # corr /= len(parts_sum)
