@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from qingxu_plot import generate_emotion_chart
 from count_plot  import generate_comment_count_chart
-
+from corr_plot import create_heatmap_plotly
 
 # 项目介绍文件的函数
 def open_readme_in_github():
@@ -120,6 +120,12 @@ with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
             output_img5 = gr.Plot(label="评论理智程度时序分析")
             submit_button5 = gr.Button("评论理智程度时序分析")
             # submit_button5.click()
+        gr.Markdown("<!-- 这是一个空行 -->")
+        gr.Markdown("<!-- 这是一个空行 -->")
+        with gr.Column():
+            output_plot2 = gr.Plot(label="评论理智程度时序分析")
+            submit_button9 = gr.Button("评论相关度时序分析")
+            submit_button9.click(fn=create_heatmap_plotly,inputs=[],outputs=output_plot2)
         gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("## 用户评论特征")

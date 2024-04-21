@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 def generate_comment_count_chart():
     # 加载数据
-    file_path = 'tag_data/BV151421Z7p9_updated.csv'
+    file_path = 'tag_data/BV1bA4m1c7F1_updated.csv'
     df = pd.read_csv(file_path)
 
     # 将时间戳转换为可读的日期时间格式

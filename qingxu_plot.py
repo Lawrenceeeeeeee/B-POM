@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 
 def generate_emotion_chart():
     # 加载数据
-    file_path = 'tag_data/BV151421Z7p9_updated.csv'
+    file_path = 'tag_data/BV1bA4m1c7F1_updated.csv'
     df = pd.read_csv(file_path)
 
     # 映射情绪指数到 -1, 0, 1
