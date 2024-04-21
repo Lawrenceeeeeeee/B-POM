@@ -2,8 +2,8 @@ import gradio as gr
 import webbrowser
 import os
 import pandas as pd
-from examples.simulate import generate_image
-
+from qingxu_plot import generate_emotion_chart
+from count_plot  import generate_comment_count_chart
 
 
 # 项目介绍文件的函数
@@ -58,15 +58,6 @@ input, textarea, button {
     text-align: center; /* 文本居中 */
 }
 
-.button-large {
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
 
 h1, h2 {
     text-align: center;
@@ -114,20 +105,20 @@ with gr.Blocks(css=css,theme=gr.themes.Soft()) as web:
         gr.Markdown("## 舆情变化时序统计")
         
         with gr.Column():
-            output_img3 = gr.Image(label="评论数量时序分析")
-            submit_button3 = gr.Button("分析")
-            # submit_button3.click()
+            output_img3 = gr.Plot(label="评论数量时序分析")
+            submit_button3 = gr.Button("评论数量时序分析")
+            submit_button3.click(fn=generate_comment_count_chart,outputs=output_img3)
         gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("<!-- 这是一个空行 -->")
         with gr.Column():
-            output_img4 = gr.Image(label="评论情感时序分析")
-            submit_button4 = gr.Button("分析")
-            # submit_button4.click()
+            output_plot = gr.Plot(label="评论情感时序分析")
+            submit_button4 = gr.Button("评论情感时序分析")
+            submit_button4.click(fn=generate_emotion_chart, outputs=output_plot)
         gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("<!-- 这是一个空行 -->")
         with gr.Column():
-            output_img5 = gr.Image(label="评论理智程度时序分析")
-            submit_button5 = gr.Button("分析")
+            output_img5 = gr.Plot(label="评论理智程度时序分析")
+            submit_button5 = gr.Button("评论理智程度时序分析")
             # submit_button5.click()
         gr.Markdown("<!-- 这是一个空行 -->")
         gr.Markdown("<!-- 这是一个空行 -->")
