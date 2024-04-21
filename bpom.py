@@ -1,6 +1,7 @@
 from src import get_bilibili_videos, get_comments, bvav, embedding
 from src.BertExecer import ModelInferer
 from src.word_freq import word_freq
+from src.word_cloud import word_cloud
 
 
 class bpom: 
@@ -12,12 +13,15 @@ class bpom:
         self.wf = word_freq(self.bvid, self.comments)
         self.comment_word_freq, self.freq_plot = self.wf.process_text_data()
 
-        print("# 词频统计")
-        print(self.comment_word_freq.head())
+        self.wc = word_cloud(self.bvid, self.comment_word_freq)
+        self.word_cloud_plot = self.wc.generate_wordcloud()
 
-        print("--------------------------")
-        print("# 评论示例")
-        print(self.comments.head())
+        # print("# ")
+        # print(self.comment_word_freq.head())
+
+        # print("--------------------------")
+        # print("# 评论示例")
+        # print(self.comments.head())
         # self.summary = get_bilibili_videos.get_video_summary(self.bvid)
         # self.embedded_summary = [embedding.embedding(item) for item in self.summary['parts']]
         
