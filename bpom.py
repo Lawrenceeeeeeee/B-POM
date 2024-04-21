@@ -1,4 +1,6 @@
 from src import get_bilibili_videos, get_comments, bvav, embedding
+from src.BertExecer import ModelInferer
+
 
 class bpom: 
     def __init__(self, bvid):
@@ -37,6 +39,9 @@ class bpom:
     def run(self):
         if 'content' in self.comments.columns:
             self.comments['correlation_score'] = self.comments['content'].apply(self.correlation_score)
+            inferer = ModelInferer()
+        for key in inferer.models.keys():
+            self.comments[key + '_score'] = self.comments['content'].apply(lambda x: inferer.predict(x, key))
         else:
             print("Content column is missing in the comments DataFrame.") 
         print(self.comments.head())

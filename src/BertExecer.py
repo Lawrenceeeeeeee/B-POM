@@ -3,18 +3,29 @@ from transformers import BertTokenizer, BertForSequenceClassification
 from torch.nn.functional import softmax
 
 class ModelInferer:
-    def __init__(self, model_dirs, tokenizer_path):
+    def __init__(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.models = {}
+        
+        # 内置模型目录和tokenizer路径
+        model_dirs = {
+            "manyi": "models/Bert-updated-manyi",
+            "qingxu": "models/Bert-updated-qingxu",
+            "taolun": "models/Bert-updated-taolun",
+            "tiwen": "models/Bert-updated-tiwen",
+            "wangeng": "models/Bert-updated-wangeng"
+        }
+        tokenizer_path = "models/Bert-Large-Chinese"
+        
+        # 加载tokenizer
         self.tokenizer = BertTokenizer.from_pretrained(tokenizer_path)
 
+        # 加载模型
         for key, model_dir in model_dirs.items():
             print(f"Loading model from {model_dir}...")
             model = BertForSequenceClassification.from_pretrained(model_dir)
-            
             model.to(self.device)
             model.eval()
-            
             self.models[key] = model
 
     def predict(self, text, model_key):
@@ -29,23 +40,3 @@ class ModelInferer:
 
         predicted_label = torch.argmax(probs, dim=1).item()
         return predicted_label + 1 if model_key in ['manyi', 'qingxu'] else predicted_label
-
-# Paths to the trained models
-model_dirs = {
-    "manyi": "models/Bert-updated-manyi",
-    "qingxu": "models/Bert-updated-qingxu",
-    "taolun": "models/Bert-updated-taolun",
-    "tiwen": "models/Bert-updated-tiwen",
-    "wangeng": "models/Bert-updated-wangeng"
-}
-
-tokenizer_path = "models\Bert-Large-Chinese"  # Replace with the path where the common tokenizer is stored
-inferer = ModelInferer(model_dirs, tokenizer_path)
-
-# Example text to predict
-text = "这个产品真不错！"
-
-# Making predictions with each model
-for key in model_dirs.keys():
-    prediction = inferer.predict(text, key)
-    print(f"Prediction using {key} model: {prediction}")
