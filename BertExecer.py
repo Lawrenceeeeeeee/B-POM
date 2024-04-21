@@ -1,57 +1,51 @@
-import pandas as pd
 import torch
 from transformers import BertTokenizer, BertForSequenceClassification
+from torch.nn.functional import softmax
 
-# 加载模型和分词器
-def load_model(model_path):
-    model = BertForSequenceClassification.from_pretrained(model_path)
-    tokenizer = BertTokenizer.from_pretrained(model_path)
-    model.eval()  # 设置为评估模式
-    return model, tokenizer
+class ModelInferer:
+    def __init__(self, model_dirs, tokenizer_path):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.models = {}
+        self.tokenizer = BertTokenizer.from_pretrained(tokenizer_path)
 
-# 预测单条文本
-def predict(text, model, tokenizer, device, is_rational=False):
-    encoded_dict = tokenizer.encode_plus(
-        text,
-        add_special_tokens=True,
-        max_length=256,
-        padding='max_length',
-        truncation=True,
-        return_tensors='pt'
-    )
-    input_ids = encoded_dict['input_ids'].to(device)
-    attention_mask = encoded_dict['attention_mask'].to(device)
+        for key, model_dir in model_dirs.items():
+            print(f"Loading model from {model_dir}...")
+            model = BertForSequenceClassification.from_pretrained(model_dir)
+            
+            model.to(self.device)
+            model.eval()
+            
+            self.models[key] = model
 
-    with torch.no_grad():
-        outputs = model(input_ids, attention_mask=attention_mask)
-        logits = outputs.logits
-        probs = torch.nn.functional.softmax(logits, dim=1)
-        predicted_class = torch.argmax(probs, dim=1) + 1  # 转换为1-5的范围
+    def predict(self, text, model_key):
+        model = self.models[model_key]
+        inputs = self.tokenizer(text, return_tensors="pt", max_length=512, truncation=True, padding="max_length")
+        input_ids = inputs['input_ids'].to(self.device)
+        attention_mask = inputs['attention_mask'].to(self.device)
 
-    # 如果是理性分析，转换输出为0或1
-    if is_rational:
-        predicted_class = 0 if predicted_class <= 3 else 1  # 假定1-3为类别“0”，4-5为类别“1”
+        with torch.no_grad():
+            outputs = model(input_ids, attention_mask=attention_mask)
+            probs = softmax(outputs.logits, dim=1)
 
-    return predicted_class.item()
+        predicted_label = torch.argmax(probs, dim=1).item()
+        return predicted_label + 1 if model_key in ['manyi', 'qingxu'] else predicted_label
 
-# 处理CSV文件
-def process_csv(input_csv, output_csv, model_path, device):
-    model, tokenizer = load_model(model_path)
-    df = pd.read_csv(input_csv)
-    # 情感分析，输出范围1-5
-    df['emotion'] = [predict(row['content'], model, tokenizer, device, is_rational=False) for index, row in df.iterrows()]
-    # 理性分析，输出范围0或1
-    df['rational'] = [predict(row['content'], model, tokenizer, device, is_rational=True) for index, row in df.iterrows()]
+# Paths to the trained models
+model_dirs = {
+    "manyi": "models/Bert-updated-manyi",
+    "qingxu": "models/Bert-updated-qingxu",
+    "taolun": "models/Bert-updated-taolun",
+    "tiwen": "models/Bert-updated-tiwen",
+    "wangeng": "models/Bert-updated-wangeng"
+}
 
-    df.to_csv(output_csv, index=False)
+tokenizer_path = "models\Bert-Large-Chinese"  # Replace with the path where the common tokenizer is stored
+inferer = ModelInferer(model_dirs, tokenizer_path)
 
-# 设置设备
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# Example text to predict
+text = "这个产品真不错！"
 
-# 路径和文件
-input_csv_path = 'path_to_your_input_csv.csv'
-output_csv_path = 'path_to_your_output_csv.csv'
-model_path = 'path_to_your_trained_model'
-
-# 执行预测并处理CSV
-process_csv(input_csv_path, output_csv_path, model_path, device)
+# Making predictions with each model
+for key in model_dirs.keys():
+    prediction = inferer.predict(text, key)
+    print(f"Prediction using {key} model: {prediction}")
