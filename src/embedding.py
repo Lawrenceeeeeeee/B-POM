@@ -13,7 +13,7 @@ original_cwd = os.getcwd()
 os.chdir(current_dir)
 load_dotenv()
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get('CHATANYWHERE_API_KEY'), base_url="https://api.chatanywhere.tech/v1")
 os.chdir(original_cwd)
 
 def embedding(text, model="text-embedding-3-large"):

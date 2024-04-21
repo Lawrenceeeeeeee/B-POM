@@ -2,28 +2,35 @@ from src import get_bilibili_videos, get_comments, bvav, embedding
 from src.BertExecer import ModelInferer
 from src.word_freq import word_freq
 from src.word_cloud import word_cloud
+import os
 
 
 class bpom: 
     def __init__(self, bvid):
         self.bvid = bvid
         self.oid = str(bvav.bv2av(bvid))
+        print("获取全部评论")
+        print(os.getcwd())
         self.comments = self.fetch_comments()
+        print(os.getcwd())
         
+        print("词频")
+        print(os.getcwd())
         self.wf = word_freq(self.bvid, self.comments)
         self.comment_word_freq, self.freq_plot = self.wf.process_text_data()
+        print(os.getcwd())
 
+        print("wordcloud")
+        print(os.getcwd())
         self.wc = word_cloud(self.bvid, self.comment_word_freq)
         self.word_cloud_plot = self.wc.generate_wordcloud()
+        print(os.getcwd())
 
-        # print("# ")
-        # print(self.comment_word_freq.head())
-
-        # print("--------------------------")
-        # print("# 评论示例")
-        # print(self.comments.head())
-        # self.summary = get_bilibili_videos.get_video_summary(self.bvid)
-        # self.embedded_summary = [embedding.embedding(item) for item in self.summary['parts']]
+        print("summary")
+        print(os.getcwd())
+        self.summary = get_bilibili_videos.get_video_summary(self.bvid)
+        self.embedded_summary = [embedding.embedding(item) for item in self.summary['parts']]
+        print(os.getcwd())
         
         
     def fetch_comments(self):
@@ -49,9 +56,6 @@ class bpom:
         comment_vec = embedding.embedding(comment)
         parts_sum = self.summary['parts']
         return get_bilibili_videos.comment_correlation(comment_vec, self.embedded_summary)
-    
-    def word_freq(self):
-        pass
 
     def run(self):
         if 'content' in self.comments.columns:
