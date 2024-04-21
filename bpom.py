@@ -40,8 +40,8 @@ class bpom:
         if 'content' in self.comments.columns:
             self.comments['correlation_score'] = self.comments['content'].apply(self.correlation_score)
             inferer = ModelInferer()
-        for key in inferer.models.keys():
-            self.comments[key + '_score'] = self.comments['content'].apply(lambda x: inferer.predict(x, key))
+            for key in inferer.models.keys():
+                self.comments[key + '_score'] = self.comments['content'].apply(lambda x: inferer.predict(x, key))
         else:
             print("Content column is missing in the comments DataFrame.") 
         print(self.comments.head())
