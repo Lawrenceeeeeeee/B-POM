@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontManager
 
 class word_freq:
-    def __init__(self, comments, data_dir='data'):
+    def __init__(self, bvid, comments, data_dir='data'):
+        self.bvid = bvid
         self.comments = comments
         self.crawler_dir = os.path.join(data_dir, 'crawler')
         self.freq_dir = os.path.join(data_dir, 'word_frequencies')
@@ -15,7 +16,7 @@ class word_freq:
         os.makedirs(self.plot_dir, exist_ok=True)
         self.font = self.get_chinese_font()
 
-        self.stopwords_path = os.path.join(data_dir, 'cn_stopwords.txt')
+        self.stopwords_path = os.path.join(data_dir, 'resources/cn_stopwords.txt')
 
     def get_chinese_font(self):
         """Identify the best available Chinese font."""
@@ -53,7 +54,7 @@ class word_freq:
         ax.set_ylabel('频次')
         ax.set_title('Top 10 Words Frequency')
         plt.xticks(rotation=45)
-        plt_path = os.path.join(self.plot_dir, 'freq_plot.png')
+        plt_path = os.path.join(self.plot_dir, f'{bvid}_freq_plot.png')
         plt.savefig(plt_path)
         plt.close()
         return df_word_freq, plt_path

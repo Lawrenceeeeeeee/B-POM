@@ -2,8 +2,11 @@ from openai import OpenAI
 import os
 import json
 import numpy as np
+from dotenv import load_dotenv
 
-client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+load_dotenv()
+
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 def embedding(text, model="text-embedding-3-large"):
 

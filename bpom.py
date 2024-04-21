@@ -9,10 +9,14 @@ class bpom:
         self.oid = str(bvav.bv2av(bvid))
         self.comments = self.fetch_comments()
         
-        self.wf = word_freq(self.comments)
+        self.wf = word_freq(self.bvid, self.comments)
         self.comment_word_freq, self.freq_plot = self.wf.process_text_data()
+
+        print("# 词频统计")
         print(self.comment_word_freq.head())
-        
+
+        print("--------------------------")
+        print("# 评论示例")
         print(self.comments.head())
         # self.summary = get_bilibili_videos.get_video_summary(self.bvid)
         # self.embedded_summary = [embedding.embedding(item) for item in self.summary['parts']]
