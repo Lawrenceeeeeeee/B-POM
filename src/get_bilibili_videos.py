@@ -7,9 +7,17 @@ import src.embedding as emb
 from openai import OpenAI
 from dotenv import load_dotenv
 
+
+# 获取当前函数所在文件的目录
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# 保存原始工作目录
+original_cwd = os.getcwd()
+# 更改工作目录到函数所在文件目录
+os.chdir(current_dir)
 load_dotenv()
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get('CHATANYWHERE_API_KEY'), base_url="https://api.chatanywhere.tech/v1")
+os.chdir(original_cwd)
 
 SESSDATA = 'f7d22332%2C1728481618%2Cf242a%2A41CjBLPbnBWSHKva1n24Wnxt-G4dxI7CA89KIX2tcS7zVz6VFvUVwj-hvU96ZCR68-kFESVjlsc0NOMi10ZUNpRGFNRnJyNXNHTEpLbzMzaTJSeV93aGpKRFRLUk5wRFpLdzFvcjFRZFZ6alAzLUJkZkVIUTFVMVh2WjVJV1p6eXhrVUhqelVIc3lRIIEC'
 
