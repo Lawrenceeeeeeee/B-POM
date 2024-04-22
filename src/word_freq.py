@@ -38,4 +38,4 @@ class word_freq:
         fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
         plt_path = os.path.join(self.plot_dir, f'{self.bvid}_freq_plot.html')
         fig.write_html(plt_path)
-        return df_word_freq, plt_path
+        return df_word_freq, fig

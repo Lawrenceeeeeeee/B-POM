@@ -1,10 +1,4 @@
-# 文本分析小组展示
-
-小组成员：郭峻荣、代旭科、赵博涵、曾子桐
-
-# 项目介绍
-
-Bilibili public opinion monitor
+# Bilibili Public Opinion Monitor (B-POM)
 
 ## 项目基本实现思路
 

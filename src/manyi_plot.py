@@ -7,7 +7,7 @@ def generate_emotion_chart(comments):
 
     # 映射情绪指数到 -1, 0, 1
     emotion_mapping = {1: -1, 2: 0, 3: 1}
-    df['qingxu_score'] = df['qingxu_score'].map(emotion_mapping)
+    df['manyi_score'] = df['manyi_score'].map(emotion_mapping)
 
     # 将时间戳转换为可读的日期时间格式
     df['timestamp'] = pd.to_numeric(df['timestamp'], errors='coerce')
@@ -17,19 +17,19 @@ def generate_emotion_chart(comments):
     df.sort_values('datetime', inplace=True)
 
     # 计算情绪的累积值
-    df['emotion_cumsum'] = df['qingxu_score'].cumsum()
+    df['manyi_cumsum'] = df['manyi_score'].cumsum()
 
     # 生成图表
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=df['datetime'], y=df['emotion_cumsum'],
-        mode='lines+markers', name='情绪变化',
+        x=df['datetime'], y=df['manyi_cumsum'],
+        mode='lines+markers', name='满意度变化',
         line=dict(color='rgba(30, 144, 255, 0.8)', width=3, shape='spline'),
         marker=dict(color='rgba(30, 144, 255, 0.8)', size=6)  # 标记点颜色
     ))
     fig.update_layout(
         xaxis_title='日期和时间',
-        yaxis_title='累积情绪值',
+        yaxis_title='累积满意度',
         plot_bgcolor='rgba(245, 245, 245, 1)',  # 轻微灰色的背景色
         font=dict(family="Arial, sans-serif", size=16, color="#333"),
         xaxis=dict(
